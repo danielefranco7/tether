@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
+import android.view.View
 import android.widget.Button
 import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 
 /** Schermata della Master: toggle di abilitazione e stato dell'accesso alle notifiche (REQ-PAU-01/02). */
 class MainActivity : AppCompatActivity() {
@@ -35,6 +37,29 @@ class MainActivity : AppCompatActivity() {
 
         grant.setOnClickListener {
             startActivity(android.content.Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateAccessState()
+    }
+
+    /**
+     * Verifica se l'accesso alle notifiche è stato concesso. Se manca, avvisa l'utente e mostra
+     * il pulsante per concederlo; altrimenti mostra la conferma.
+     */
+    private fun updateAccessState() {
+        val text = findViewById<TextView>(R.id.accessText)
+        val grant = findViewById<Button>(R.id.grantAccessButton)
+        val granted = NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)
+
+        if (granted) {
+            text.setText(R.string.access_granted)
+            grant.visibility = View.GONE
+        } else {
+            text.setText(R.string.access_missing)
+            grant.visibility = View.VISIBLE
         }
     }
 

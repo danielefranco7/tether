@@ -4,4 +4,6 @@
     <string name="status_enabled">Master attiva: inoltro in corso.</string>
     <string name="status_disabled">Master disattivata: nessuna attività in background.</string>
     <string name="grant_access">Concedi accesso alle notifiche</string>
+    <string name="access_missing">Attenzione: l\'accesso alle notifiche non è consentito. La Master non può inoltrare nulla finché non lo concedi.</string>
+    <string name="access_granted">Accesso alle notifiche consentito.</string>
 </resources>

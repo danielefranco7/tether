@@ -17,6 +17,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp" />
 
+    <TextView
+        android:id="@+id/accessText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp" />
+
     <Button
         android:id="@+id/grantAccessButton"
         android:layout_width="wrap_content"
