@@ -16,6 +16,7 @@ class NotificationForwarderService : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         sbn ?: return
+        rules.rememberPackage(sbn.packageName)
         val level = rules.levelFor(sbn.packageName)
         if (level == NotificationLevel.DISCARDED) return
         // TODO: cifratura e invio alla Slave tramite relay (PROTOCOL.md, sezioni 4 e 5.1).

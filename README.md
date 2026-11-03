@@ -34,7 +34,7 @@ Build: `.\gradlew.bat :master:assembleDebug :slave:assembleDebug`
 
 ## Requisiti principali
 
-- Livelli di notifica: 0 (scartata), 1 (vibrazione), 2 (silenziosa).
+- Livelli di notifica: 0 (scartata), 1 (silenziosa, visibile all'accensione dello schermo), 2 (avviso immediato con vibrazione/suono).
 - Cifratura end-to-end: il Relay non può leggere il contenuto.
 - Abilitazione/pausa della Master, con consumo energetico minimo quando spenta (REQ-PAU, REQ-PRF-04).
 - Intervallo dell'heartbeat configurabile dall'utente (predefinito 60 s).

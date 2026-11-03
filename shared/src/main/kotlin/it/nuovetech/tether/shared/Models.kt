@@ -5,11 +5,11 @@ enum class NotificationLevel(val code: Int) {
     /** Scartata: non lascia mai la Master. */
     DISCARDED(0),
 
-    /** Inviata alla Slave e fa vibrare il dispositivo. */
-    VIBRATE(1),
+    /** Inoltrata alla Slave in silenzio, visibile quando lo schermo si accende. */
+    SILENT(1),
 
-    /** Inviata alla Slave senza vibrazione, visibile quando lo schermo si accende. */
-    SILENT(2);
+    /** Inoltrata alla Slave con avviso immediato (vibrazione/suono). */
+    ALERT(2);
 }
 
 /** Tipi di messaggio definiti in PROTOCOL.md, sezione 5. */

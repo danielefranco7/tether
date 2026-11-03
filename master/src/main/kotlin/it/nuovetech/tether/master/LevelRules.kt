@@ -20,7 +20,18 @@ class LevelRules(context: Context) {
         prefs.edit().putInt(packageName, level.code).apply()
     }
 
+    /** Registra un package che ha inviato una notifica, così compare nell'elenco anche senza icona nel launcher. */
+    fun rememberPackage(packageName: String) {
+        val seen = prefs.getStringSet(KEY_SEEN, emptySet()) ?: emptySet()
+        if (packageName !in seen) {
+            prefs.edit().putStringSet(KEY_SEEN, seen + packageName).apply()
+        }
+    }
+
+    fun seenPackages(): Set<String> = prefs.getStringSet(KEY_SEEN, emptySet()) ?: emptySet()
+
     private companion object {
         const val PREFS = "tether_level_rules"
+        const val KEY_SEEN = "seen_packages"
     }
 }

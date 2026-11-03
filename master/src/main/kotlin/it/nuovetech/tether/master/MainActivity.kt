@@ -2,9 +2,12 @@ package it.nuovetech.tether.master
 
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.Switch
@@ -38,6 +41,20 @@ class MainActivity : AppCompatActivity() {
         grant.setOnClickListener {
             startActivity(android.content.Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menu.add(0, MENU_APP_RULES, 0, R.string.menu_app_rules)
+            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == MENU_APP_RULES) {
+            startActivity(Intent(this, AppRulesActivity::class.java))
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onResume() {
@@ -82,5 +99,6 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val KEY_ENABLED = "master_enabled"
+        private const val MENU_APP_RULES = 1
     }
 }

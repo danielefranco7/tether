@@ -80,7 +80,7 @@ Payload cifrato:
 ```json
 {
   "type": "EVENT",
-  "level": 1,
+  "level": 2,
   "event": {
     "eventId": "uuid",
     "app": "com.whatsapp",
@@ -97,10 +97,10 @@ Payload cifrato:
 
 | `type` | Uso |
 |---|---|
-| `EVENT` | Notifica normalizzata (REQ-CAP-02). `level` è 1 (avviso) o 2 (silenzioso). Il livello 0 non viene mai inviato (REQ-RUL-06). |
+| `EVENT` | Notifica normalizzata (REQ-CAP-02). `level` è 1 (silenzioso) o 2 (avviso immediato). Il livello 0 non viene mai inviato (REQ-RUL-06). |
 | `EVENT_CANCEL` | La notifica è stata rimossa sulla Master (REQ-CAP-05). Riferisce `eventId`. |
 | `MISSED_CALL` | Chiamata persa (REQ-CAL-01). Campi: `callerName`, `callerNumber`, `postedAt`, `level`. |
-| `EVENT` con `level` 1 e VIP | Stesso formato: la promozione è già applicata dalla Master. |
+| `EVENT` con `level` 2 e VIP | Stesso formato: la promozione è già applicata dalla Master. |
 
 Regole:
 - `text` è limitato a 1000 caratteri. Il contenuto più lungo viene troncato sulla Master (REQ-FWD-05: nessun allegato).

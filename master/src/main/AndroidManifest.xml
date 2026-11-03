@@ -3,6 +3,14 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Android 11+: necessario per elencare le app con icona nel launcher (AppRulesActivity). -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
     <application
         android:allowBackup="false"
         android:label="Tether Master"
@@ -17,6 +25,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".AppRulesActivity"
+            android:exported="false"
+            android:label="@string/app_rules_title" />
 
         <!--
           Il servizio è dichiarato ma disabilitato di default: viene abilitato solo

@@ -161,13 +161,13 @@ Il sistema è autonomo e si appoggia alle funzioni di sistema Android per l'acce
 
 | ID | Requisito | Priorità | Verifica |
 |---|---|---|---|
-| REQ-RUL-01 | Il sistema deve supportare tre livelli di trattamento: Livello 0 (scartata), Livello 1 (avviso immediato), Livello 2 (inoltro silenzioso). | Must | T |
+| REQ-RUL-01 | Il sistema deve supportare tre livelli di trattamento: Livello 0 (scartata), Livello 1 (inoltro silenzioso), Livello 2 (avviso immediato). | Must | T |
 | REQ-RUL-02 | L'utente deve poter assegnare un livello a ciascuna app installata sulla Master. Il valore predefinito per le app non configurate deve essere Livello 0. | Must | T |
-| REQ-RUL-03 | L'utente deve poter definire contatti VIP; un evento con mittente VIP deve essere promosso a Livello 1. | Must | T |
-| REQ-RUL-04 | L'utente dovrebbe poter definire parole chiave che promuovono un evento a Livello 1. | Should | T |
-| REQ-RUL-05 | L'utente dovrebbe poter definire regole di escalation (ad esempio: tre tentativi dello stesso mittente entro un intervallo configurabile promuovono l'evento a Livello 1). | Could | T |
+| REQ-RUL-03 | L'utente deve poter definire contatti VIP; un evento con mittente VIP deve essere promosso a Livello 2. | Must | T |
+| REQ-RUL-04 | L'utente dovrebbe poter definire parole chiave che promuovono un evento a Livello 2. | Should | T |
+| REQ-RUL-05 | L'utente dovrebbe poter definire regole di escalation (ad esempio: tre tentativi dello stesso mittente entro un intervallo configurabile promuovono l'evento a Livello 2). | Could | T |
 | REQ-RUL-06 | La valutazione delle regole deve avvenire sulla Master, prima dell'invio, in modo che gli eventi di Livello 0 non lascino mai il telefono. | Must | A, T |
-| REQ-RUL-07 | L'utente dovrebbe poter definire fasce orarie in cui un livello viene degradato (ad esempio Livello 1 → Livello 2). | Could | T |
+| REQ-RUL-07 | L'utente dovrebbe poter definire fasce orarie in cui un livello viene degradato (ad esempio Livello 2 → Livello 1). | Could | T |
 
 #### 3.1.4 Inoltro e ricezione
 
@@ -183,8 +183,8 @@ Il sistema è autonomo e si appoggia alle funzioni di sistema Android per l'acce
 
 | ID | Requisito | Priorità | Verifica |
 |---|---|---|---|
-| REQ-UI-01 | L'App Slave deve fare vibrare il dispositivo alla ricezione di un evento di Livello 1. | Must | T |
-| REQ-UI-02 | L'App Slave non deve produrre vibrazione né suono alla ricezione di un evento di Livello 2. | Must | T |
+| REQ-UI-01 | L'App Slave deve fare vibrare il dispositivo alla ricezione di un evento di Livello 2. | Must | T |
+| REQ-UI-02 | L'App Slave non deve produrre vibrazione né suono alla ricezione di un evento di Livello 1. | Must | T |
 | REQ-UI-03 | L'App Slave deve mostrare l'elenco degli eventi ricevuti, ordinati per orario, con indicazione di app, mittente, testo e livello. | Must | D |
 | REQ-UI-04 | L'App Slave deve conservare in locale, cifrati, gli ultimi N eventi (N configurabile, predefinito 200) e renderli consultabili offline. | Must | T |
 | REQ-UI-05 | L'App Slave deve distinguere visivamente gli eventi non letti. | Should | D |
@@ -197,7 +197,7 @@ Il sistema è autonomo e si appoggia alle funzioni di sistema Android per l'acce
 | ID | Requisito | Priorità | Verifica |
 |---|---|---|---|
 | REQ-CAL-01 | Se la SIM è sulla Master, l'App Master deve rilevare le chiamate perse e inoltrarle come eventi del tipo "chiamata persa", contenenti nome o numero del chiamante e orario. | Must | T |
-| REQ-CAL-02 | Un evento di chiamata persa da un contatto VIP deve essere promosso a Livello 1. | Must | T |
+| REQ-CAL-02 | Un evento di chiamata persa da un contatto VIP deve essere promosso a Livello 2. | Must | T |
 | REQ-CAL-03 | L'App Slave deve permettere di richiamare un numero indicato in un evento di chiamata, tramite il numero del dispositivo Slave. | Should | D |
 | REQ-CAL-04 | Se la SIM è spostata sulla Slave, il sistema non deve richiedere configurazioni aggiuntive per ricevere le chiamate; l'App Slave non deve interferire con la telefonia nativa. | Must | T |
 | REQ-CAL-05 | L'App Slave deve informare l'utente che il numero mostrato in uscita è quello del dispositivo Slave, quando diverso dal numero principale. | Should | I |

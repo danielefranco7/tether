@@ -6,4 +6,10 @@
     <string name="grant_access">Concedi accesso alle notifiche</string>
     <string name="access_missing">Attenzione: l\'accesso alle notifiche non è consentito. La Master non può inoltrare nulla finché non lo concedi.</string>
     <string name="access_granted">Accesso alle notifiche consentito.</string>
+    <string name="menu_app_rules">Regole per app</string>
+    <string name="app_rules_title">Regole per app</string>
+    <string name="app_rules_hint">Tocca un\'app per cambiarne il livello: 0 → 1 → 2 → 0. Le app non configurate sono scartate.</string>
+    <string name="level_discarded">0 - Scartata</string>
+    <string name="level_silent">1 - Silenziosa</string>
+    <string name="level_alert">2 - Avviso immediato</string>
 </resources>
