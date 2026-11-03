@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Tether Master</string>
+    <string name="master_toggle">Abilita Master</string>
+    <string name="status_enabled">Master attiva: inoltro in corso.</string>
+    <string name="status_disabled">Master disattivata: nessuna attività in background.</string>
+    <string name="grant_access">Concedi accesso alle notifiche</string>
+</resources>

@@ -302,7 +302,7 @@ Il sistema è autonomo e si appoggia alle funzioni di sistema Android per l'acce
 |---|---|---|
 | REQ-CON-01 | L'App Master e l'App Slave sono sviluppate per Android. | Must |
 | REQ-CON-02 | La versione 1.0 non include hardware dedicato. | Must |
-| REQ-CON-03 | Il Relay non deve richiedere un account Google sul dispositivo Slave. | Should |
+| REQ-CON-03 | Il Relay non deve richiedere nessun account sul dispositivo Slave. | Must |
 
 ---
 
