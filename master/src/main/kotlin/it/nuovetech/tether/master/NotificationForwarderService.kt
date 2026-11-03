@@ -2,17 +2,23 @@ package it.nuovetech.tether.master
 
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import it.nuovetech.tether.shared.NotificationLevel
 
 /**
  * Intercetta le notifiche di sistema. Attivo solo quando la Master è abilitata (REQ-PAU-01).
  *
- * Stato attuale: scheletro. Tutte le notifiche sono scartate (livello 0), quindi nulla
- * lascia il dispositivo. La classificazione per livello e l'inoltro arrivano nei prossimi passi.
+ * Classifica ogni notifica con il livello assegnato al suo package. L'inoltro verso la Slave
+ * non è ancora implementato: nulla lascia il dispositivo.
  */
 class NotificationForwarderService : NotificationListenerService() {
 
+    private val rules by lazy { LevelRules(this) }
+
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
-        // Livello 0 (DISCARDED) per default: nessun inoltro finché le regole non sono implementate.
+        sbn ?: return
+        val level = rules.levelFor(sbn.packageName)
+        if (level == NotificationLevel.DISCARDED) return
+        // TODO: cifratura e invio alla Slave tramite relay (PROTOCOL.md, sezioni 4 e 5.1).
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {
