@@ -1,15 +1,17 @@
 <resources>
     <string name="app_name">Tether Master</string>
-    <string name="master_toggle">Abilita Master</string>
-    <string name="status_enabled">Master attiva: inoltro in corso.</string>
-    <string name="status_disabled">Master disattivata: nessuna attività in background.</string>
-    <string name="grant_access">Concedi accesso alle notifiche</string>
-    <string name="access_missing">Attenzione: l\'accesso alle notifiche non è consentito. La Master non può inoltrare nulla finché non lo concedi.</string>
-    <string name="access_granted">Accesso alle notifiche consentito.</string>
-    <string name="menu_app_rules">Regole per app</string>
-    <string name="app_rules_title">Regole per app</string>
-    <string name="app_rules_hint">Tocca un\'app per cambiarne il livello: 0 → 1 → 2 → 0. Le app non configurate sono scartate.</string>
-    <string name="level_discarded">0 - Scartata</string>
-    <string name="level_silent">1 - Silenziosa</string>
-    <string name="level_alert">2 - Avviso immediato</string>
+    <string name="master_toggle">Enable Master</string>
+    <string name="status_enabled">Master active: forwarding notifications.</string>
+    <string name="status_disabled">Master disabled: no background activity.</string>
+    <string name="grant_access">Grant notification access</string>
+    <string name="access_missing">Warning: notification access is not granted. The Master cannot forward anything until you grant it.</string>
+    <string name="access_granted">Notification access granted.</string>
+    <string name="menu_app_rules">App rules</string>
+    <string name="app_rules_title">App rules</string>
+    <string name="app_rules_hint">Tap an app to change its level: 0 → 1 → 2 → 0. Apps that are not configured are discarded.</string>
+    <string name="level_discarded">0 - Discarded</string>
+    <string name="level_silent">1 - Silent</string>
+    <string name="level_alert">2 - Immediate alert</string>
+    <string name="debug_title">Debug: forwarded events (not sent yet)</string>
+    <string name="debug_empty">No events forwarded yet.</string>
 </resources>

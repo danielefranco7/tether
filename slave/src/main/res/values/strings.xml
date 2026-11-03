@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Tether Slave</string>
-    <string name="status_waiting">In attesa di eventi dalla Master.</string>
+    <string name="status_waiting">Waiting for events from the Master.</string>
 </resources>

@@ -1,8 +1,10 @@
 package it.nuovetech.tether.master
 
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
@@ -14,12 +16,22 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 
-/** Schermata della Master: toggle di abilitazione e stato dell'accesso alle notifiche (REQ-PAU-01/02). */
+/** Schermata della Master: toggle di abilitazione, stato dell'accesso alle notifiche e debug (REQ-PAU-01/02). */
 class MainActivity : AppCompatActivity() {
 
     private val prefs by lazy { getSharedPreferences("tether_master", Context.MODE_PRIVATE) }
     private val listenerComponent by lazy { ComponentName(this, NotificationForwarderService::class.java) }
+    private val debugText by lazy { findViewById<TextView>(R.id.debugText) }
+    private var debugEmpty = true
+
+    private val payloadReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val payload = intent?.getStringExtra(NotificationForwarderService.EXTRA_PAYLOAD) ?: return
+            showDebugPayload(payload)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +72,37 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateAccessState()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        renderDebugBuffer()
+        ContextCompat.registerReceiver(
+            this,
+            payloadReceiver,
+            IntentFilter(NotificationForwarderService.ACTION_DEBUG_PAYLOAD),
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+    }
+
+    override fun onStop() {
+        unregisterReceiver(payloadReceiver)
+        super.onStop()
+    }
+
+    /** Ricarica nella debug area i payload ricevuti mentre l'Activity era chiusa. */
+    private fun renderDebugBuffer() {
+        val recent = NotificationForwarderService.recentPayloads()
+        if (recent.isEmpty()) return
+        debugText.text = recent.joinToString("\n\n", postfix = "\n\n")
+        debugEmpty = false
+    }
+
+    /** Aggiunge il payload in cima alla debug area; nessun dato viene salvato su disco. */
+    private fun showDebugPayload(payload: String) {
+        val entry = payload + "\n\n"
+        debugText.text = if (debugEmpty) entry else entry + debugText.text
+        debugEmpty = false
     }
 
     /**
