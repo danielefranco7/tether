@@ -17,6 +17,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 /** Schermata della Master: toggle di abilitazione, stato dell'accesso alle notifiche e debug (REQ-PAU-01/02). */
 class MainActivity : AppCompatActivity() {
@@ -36,6 +38,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val root = findViewById<View>(R.id.rootLayout)
+        val basePadding = resources.getDimensionPixelSize(R.dimen.screen_padding)
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(
+                basePadding + bars.left,
+                basePadding + bars.top,
+                basePadding + bars.right,
+                basePadding + bars.bottom,
+            )
+            insets
+        }
 
         val toggle = findViewById<Switch>(R.id.masterToggle)
         val status = findViewById<TextView>(R.id.statusText)
@@ -77,6 +92,9 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         renderDebugBuffer()
+        findViewById<TextView>(R.id.relayText).text = getString(R.string.relay_url, BuildConfig.RELAY_URL)
+        showRelayState(NotificationForwarderService.relayState)
+        NotificationForwarderService.onRelayStateChanged = { state -> runOnUiThread { showRelayState(state) } }
         ContextCompat.registerReceiver(
             this,
             payloadReceiver,
@@ -86,8 +104,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
+        NotificationForwarderService.onRelayStateChanged = null
         unregisterReceiver(payloadReceiver)
         super.onStop()
+    }
+
+    private fun showRelayState(state: RelayClient.State) {
+        val text = if (state == RelayClient.State.CONNECTED) R.string.relay_connected else R.string.relay_disconnected
+        findViewById<TextView>(R.id.relayText).setText(text)
     }
 
     /** Ricarica nella debug area i payload ricevuti mentre l'Activity era chiusa. */

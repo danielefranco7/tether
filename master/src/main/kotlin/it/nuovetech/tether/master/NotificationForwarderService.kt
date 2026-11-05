@@ -15,6 +15,22 @@ import it.nuovetech.tether.shared.NotificationLevel
 class NotificationForwarderService : NotificationListenerService() {
 
     private val rules by lazy { LevelRules(this) }
+    private val relay by lazy {
+        RelayClient().also {
+            it.onStateChanged = { state ->
+                relayState = state
+                onRelayStateChanged?.invoke(state)
+            }
+        }
+    }
+
+    override fun onListenerConnected() {
+        relay.connect()
+    }
+
+    override fun onListenerDisconnected() {
+        relay.close()
+    }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         sbn ?: return
@@ -28,12 +44,13 @@ class NotificationForwarderService : NotificationListenerService() {
         val payload = EventPayload.build(sbn, appLabel, level)
 
         remember(payload)
+        relay.send(payload)
         sendBroadcast(
             Intent(ACTION_DEBUG_PAYLOAD)
                 .setPackage(packageName)
                 .putExtra(EXTRA_PAYLOAD, payload)
         )
-        // TODO: cifratura e invio alla Slave tramite relay (PROTOCOL.md, sezioni 4 e 5.1).
+        // TODO: cifratura (PROTOCOL.md, sezione 4), rinviata su indicazione.
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {
@@ -44,6 +61,14 @@ class NotificationForwarderService : NotificationListenerService() {
         const val ACTION_DEBUG_PAYLOAD = "it.nuovetech.tether.master.DEBUG_PAYLOAD"
         const val EXTRA_PAYLOAD = "payload"
         private const val BUFFER_SIZE = 50
+
+        /** Stato corrente della connessione al relay, letto dalla Main Activity. */
+        @Volatile
+        var relayState = RelayClient.State.DISCONNECTED
+
+        /** Listener impostato dalla Main Activity mentre è visibile. */
+        @Volatile
+        var onRelayStateChanged: ((RelayClient.State) -> Unit)? = null
 
         /** Ultimi payload inoltrati, in memoria, letti dalla Main Activity alla riapertura. */
         private val recent = ArrayDeque<String>()

@@ -12,6 +12,7 @@
     </queries>
 
     <application
+    android:usesCleartextTraffic="true"
         android:allowBackup="false"
         android:label="Tether Master"
         android:supportsRtl="true"

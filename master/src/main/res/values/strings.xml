@@ -6,6 +6,9 @@
     <string name="grant_access">Grant notification access</string>
     <string name="access_missing">Warning: notification access is not granted. The Master cannot forward anything until you grant it.</string>
     <string name="access_granted">Notification access granted.</string>
+    <string name="relay_url">Relay: %1$s</string>
+    <string name="relay_connected">Relay connected.</string>
+    <string name="relay_disconnected">Relay not connected.</string>
     <string name="menu_app_rules">App rules</string>
     <string name="app_rules_title">App rules</string>
     <string name="app_rules_hint">Tap an app to change its level: 0 → 1 → 2 → 0. Apps that are not configured are discarded.</string>
