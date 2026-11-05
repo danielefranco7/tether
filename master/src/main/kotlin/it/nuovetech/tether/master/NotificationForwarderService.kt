@@ -16,7 +16,7 @@ class NotificationForwarderService : NotificationListenerService() {
 
     private val rules by lazy { LevelRules(this) }
     private val relay by lazy {
-        RelayClient().also {
+        RelayClient(this).also {
             it.onStateChanged = { state ->
                 relayState = state
                 onRelayStateChanged?.invoke(state)

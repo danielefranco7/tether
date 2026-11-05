@@ -17,7 +17,8 @@ La versione attuale è un passo intermedio per verificare il flusso Master → R
 - **Messaggi:** JSON in chiaro, senza busta `v/pid/kind/id/seq/ts/nonce/ct/sig`. Il payload `EVENT` della sezione 5.1 è inviato direttamente.
 - **Handshake:** il client invia per primo `{"type":"JOIN","conversationKey":"<chiave>"}`. Il Relay registra il client nella stanza e inoltra ogni messaggio successivo agli altri peer della stessa stanza.
 - **Stato connessione:** la Master mostra URL del Relay e stato (connesso / non connesso). La Slave mostra "Connected to relay" e poi gli eventi.
-- **Nessuna coda:** se il Relay non è raggiungibile, l'evento viene scartato.
+- **Coda nel Relay:** se nella stanza non c'è nessun altro peer, il Relay trattiene i messaggi (max 500 per stanza, salvati in `relay/queue.json`) e li inoltra in ordine al primo peer che entra. La Master non ritrasmette: considera il messaggio consegnato quando il Relay lo riceve.
+- **Coda nella Master:** se il Relay non è raggiungibile, i payload restano in `SharedPreferences` (max 500) e vengono inviati alla riconnessione.
 
 Le sezioni seguenti restano il riferimento per la versione definitiva.
 

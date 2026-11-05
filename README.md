@@ -50,6 +50,12 @@ Dopo la modifica, ricompila e reinstalla Master e Slave. La porta del relay deve
 
 Il traffico in chiaro `ws://` è ammesso solo per lo sviluppo (`usesCleartextTraffic`).
 
+### Coda nel Relay
+
+Se nella stanza non c'è nessun altro peer (per esempio la Slave è spenta), il Relay trattiene i messaggi e li inoltra in ordine appena un peer entra. Il Relay scrive la coda in `relay/queue.json` (variabile `QUEUE_FILE` per cambiare percorso), quindi sopravvive ai riavvii. Limite: 500 messaggi per stanza, i più vecchi vengono scartati. I log mostrano `QUEUE` quando un messaggio viene trattenuto e `DRAIN` quando la coda viene consegnata.
+
+La Master mantiene a sua volta una coda in `SharedPreferences` se il Relay non è raggiungibile, anche dopo la chiusura dell'app.
+
 ## Documentazione
 
 - [SPECIFICATION.md](SPECIFICATION.md): specifica dei requisiti (ISO/IEC/IEEE 29148), con identificativi `REQ-*`, priorità e metodo di verifica.
@@ -67,9 +73,9 @@ Il traffico in chiaro `ws://` è ammesso solo per lo sviluppo (`usesCleartextTra
 ## Prossimi passi
 
 1. Crittografia e pairing via QR (modulo `shared`).
-2. Coda di invio nella Master quando il Relay è irraggiungibile.
+2. Coda di invio nella Master quando il Relay è irraggiungibile (fatto) e nel Relay quando lo Slave è offline (fatto).
 3. Conservazione degli eventi per 72 ore nel Relay, ACK e deduplicazione.
-4. Compatibilità Android 4/6 per la Slave (minSdk 23 attuale, da verificare).
+4. Compatibilità Android 4/6 per la Slave: verificata su Nexus 5 (Android 6, minSdk 23).
 
 ## Licenza
 

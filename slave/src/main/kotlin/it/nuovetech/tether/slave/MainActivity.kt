@@ -22,6 +22,8 @@ class MainActivity : AppCompatActivity() {
     private val client = OkHttpClient()
     private var socket: WebSocket? = null
     private val ui = Handler(Looper.getMainLooper())
+    private var started = false
+    private val retry = Runnable { connect() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,10 +33,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        started = true
         connect()
     }
 
     override fun onStop() {
+        started = false
+        ui.removeCallbacks(retry)
         socket?.close(1000, "slave in background")
         socket = null
         super.onStop()
@@ -63,15 +68,25 @@ class MainActivity : AppCompatActivity() {
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 socket = null
                 setStatus(getString(R.string.status_relay_unreachable))
+                scheduleRetry()
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 socket = null
+                scheduleRetry()
             }
         })
     }
 
+    private fun scheduleRetry() {
+        if (started) ui.postDelayed(retry, RETRY_DELAY_MS)
+    }
+
     private fun setStatus(text: String) {
         ui.post { findViewById<TextView>(R.id.statusText).text = text }
+    }
+
+    companion object {
+        private const val RETRY_DELAY_MS = 5_000L
     }
 }

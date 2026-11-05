@@ -2,6 +2,7 @@
 build/
 */build/
 local.properties
+relay/queue.json
 .idea/
 *.iml
 .DS_Store
