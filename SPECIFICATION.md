@@ -168,6 +168,7 @@ Il sistema è autonomo e si appoggia alle funzioni di sistema Android per l'acce
 | REQ-RUL-05 | L'utente dovrebbe poter definire regole di escalation (ad esempio: tre tentativi dello stesso mittente entro un intervallo configurabile promuovono l'evento a Livello 2). | Could | T |
 | REQ-RUL-06 | La valutazione delle regole deve avvenire sulla Master, prima dell'invio, in modo che gli eventi di Livello 0 non lascino mai il telefono. | Must | A, T |
 | REQ-RUL-07 | L'utente dovrebbe poter definire fasce orarie in cui un livello viene degradato (ad esempio Livello 2 → Livello 1). | Could | T |
+| REQ-RUL-08 | La Master dovrebbe rilevare gli account configurati nelle app client di posta abilitate alla trasmissione e permettere di assegnare a ciascun account un livello (0, 1, 2), oppure di applicare il livello di default a tutti gli account. | Could | T |
 
 #### 3.1.4 Inoltro e ricezione
 
@@ -343,6 +344,11 @@ Il sistema è autonomo e si appoggia alle funzioni di sistema Android per l'acce
 | OPEN-05 | Verifica di unicità e della concorrenza sul mercato (smartwatch LTE, telefoni minimali, comunicatori satellitari) e ricerca di brevetti. | Prodotto | Da definire |
 | OPEN-06 | Strategia per gli utenti con telefono principale iOS (funzioni limitate, ad esempio solo inoltro delle chiamate). | Prodotto | Da definire |
 | OPEN-07 | Valori obiettivo di consumo e latenza (REQ-PRF-01, REQ-PRF-02) da validare con prove su dispositivi reali. | Sviluppo | Da definire |
+| OPEN-08 | Ritrasmissione per eventi in stato SENT senza ACK: oggi solo alla riconnessione; definire un timeout periodico. | Sviluppo | Da definire |
+| OPEN-09 | Sopravvivenza dell'App Master in background su Android 16 (ottimizzazione batteria). | Sviluppo | Da definire |
+| OPEN-10 | Swipe per la cancellazione anche sulla Master, per coerenza con la Slave. | Prodotto | Da definire |
+| OPEN-11 | Filtro per account nelle app client di posta (REQ-RUL-08). | Prodotto | Da definire |
+| OPEN-12 | Pairing con autenticazione e cifratura del canale (in sviluppo). | Architettura | In corso |
 
 ### 5.3 Rischi principali
 
