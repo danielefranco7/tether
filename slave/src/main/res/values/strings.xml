@@ -3,4 +3,7 @@
     <string name="status_waiting">Waiting for events from the Master.</string>
     <string name="status_connected">Connected to relay. Waiting for events.</string>
     <string name="status_relay_unreachable">Relay unreachable.</string>
+    <string name="list_title">Notifications</string>
+    <string name="list_empty">No notifications yet.</string>
+    <string name="status_received">Received</string>
 </resources>

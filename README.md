@@ -50,6 +50,16 @@ Dopo la modifica, ricompila e reinstalla Master e Slave. La porta del relay deve
 
 Il traffico in chiaro `ws://` è ammesso solo per lo sviluppo (`usesCleartextTraffic`).
 
+### Lista notifiche nella Master
+La schermata principale mostra le notifiche inoltrate con icona dell'app, titolo, testo e stato: `○` in coda, `✓` trasmessa, `✓✓` confermata (ACK) dalla Slave.
+
+### ACK e deduplicazione
+La Slave conferma ogni evento ricevuto con un ACK e non mostra due volte lo stesso `eventId`. Gli ACK non vengono accodati nel Relay.
+
+### Cancellazione manuale
+Nella **Master** una pressione lunga su una riga, dopo conferma, rimuove la notifica dalla lista; la voce esce dalla coda e non viene più trasmessa (se era già nel Relay, non viene ritirata).
+Nella **Slave** si rimuove con uno swipe orizzontale in una qualsiasi direzione, senza conferma: la voce scompare dalla lista, ma l'`eventId` resta nell'insieme di dedup, quindi una ritrasmissione dello stesso evento viene confermata con ACK e non ricompare.
+
 ### Coda nel Relay
 
 Se nella stanza non c'è nessun altro peer (per esempio la Slave è spenta), il Relay trattiene i messaggi e li inoltra in ordine appena un peer entra. Il Relay scrive la coda in `relay/queue.json` (variabile `QUEUE_FILE` per cambiare percorso), quindi sopravvive ai riavvii. Limite: 500 messaggi per stanza, i più vecchi vengono scartati. I log mostrano `QUEUE` quando un messaggio viene trattenuto e `DRAIN` quando la coda viene consegnata.

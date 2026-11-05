@@ -1,6 +1,5 @@
 package it.nuovetech.tether.master
 
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -8,17 +7,15 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
-import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Client WebSocket verso il relay. Si iscrive alla stanza (JOIN) e invia i payload EVENT.
- * I payload non ancora trasmessi sono salvati in SharedPreferences e inviati alla prossima connessione,
- * anche dopo un riavvio dell'app.
+ * Client WebSocket verso il relay. Si iscrive alla stanza (JOIN), invia le voci della [NotificationOutbox]
+ * e riceve gli ACK della Slave. Alla riconnessione ritrasmette tutte le voci non confermate.
  * Versione di sviluppo: in chiaro, senza autenticazione (vedi PROTOCOL.md, sezione 4 per la cifratura).
  */
 class RelayClient(
-    context: Context,
+    private val outbox: NotificationOutbox,
     private val url: String = BuildConfig.RELAY_URL,
     private val conversationKey: String = BuildConfig.CONVERSATION_KEY,
 ) {
@@ -35,14 +32,6 @@ class RelayClient(
     private var connected = false
     private var wantConnected = false
 
-    private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-
-    /** Payload in attesa di connessione, inviati in ordine dopo il JOIN. Persistiti in [prefs]. */
-    private val pending = ArrayDeque<String>().apply {
-        val saved = JSONArray(prefs.getString(KEY_PENDING, "[]"))
-        for (i in 0 until saved.length()) add(saved.getString(i))
-    }
-
     fun connect() {
         synchronized(lock) {
             wantConnected = true
@@ -54,10 +43,17 @@ class RelayClient(
                     synchronized(lock) {
                         connected = true
                         webSocket.send(JSONObject().put("type", "JOIN").put("conversationKey", conversationKey).toString())
+                        outbox.requeueUnacked()
                         flushLocked(webSocket)
-                        persist()
                     }
                     onStateChanged?.invoke(State.CONNECTED)
+                }
+
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    val json = runCatching { JSONObject(text) }.getOrNull() ?: return
+                    if (json.optString("type") != "ACK") return
+                    val ackId = json.optString("ackId")
+                    if (outbox.setStatus(ackId, OutboxEntry.Status.ACKED)) Log.i(TAG, "ACK ricevuto: $ackId")
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: okhttp3.Response?) {
@@ -73,31 +69,24 @@ class RelayClient(
     }
 
     /**
-     * Invia un payload già serializzato. Se il relay non è connesso il payload viene accodato
-     * (fino a [MAX_PENDING]) e inviato alla prossima connessione. Restituisce true se inviato subito.
+     * Accoda una notifica nella [NotificationOutbox] e la invia subito se il relay è connesso;
+     * altrimenti apre la connessione. La voce resta in coda finché non arriva l'ACK.
      */
-    fun send(payload: String): Boolean {
-        val sent = synchronized(lock) {
-            pending.addLast(payload)
-            if (pending.size > MAX_PENDING) pending.removeFirst()
+    fun send(entry: OutboxEntry) {
+        outbox.add(entry)
+        synchronized(lock) {
             socket?.takeIf { connected }?.let { flushLocked(it) }
-            persist()
-            pending.isEmpty()
         }
-        if (!sent) connect()
-        return sent
+        if (socket == null) connect()
     }
 
-    /** Invia i payload in coda in ordine finché il socket accetta. Chiamare con [lock] tenuto. */
+    /** Invia le voci QUEUED in ordine finché il socket accetta. Chiamare con [lock] tenuto. */
     private fun flushLocked(ws: WebSocket) {
-        while (pending.isNotEmpty()) {
-            if (!ws.send(pending.first())) break
-            pending.removeFirst()
+        for (entry in outbox.unacked()) {
+            if (entry.status != OutboxEntry.Status.QUEUED) continue
+            if (!ws.send(entry.payload)) break
+            outbox.setStatus(entry.id, OutboxEntry.Status.SENT)
         }
-    }
-
-    private fun persist() {
-        prefs.edit().putString(KEY_PENDING, JSONArray(pending.toList()).toString()).apply()
     }
 
     fun close() {
@@ -121,9 +110,6 @@ class RelayClient(
 
     companion object {
         private const val TAG = "TetherRelay"
-        private const val MAX_PENDING = 500
-        private const val PREFS_NAME = "relay_queue"
-        private const val KEY_PENDING = "pending"
         private const val RETRY_DELAY_MS = 5_000L
     }
 }

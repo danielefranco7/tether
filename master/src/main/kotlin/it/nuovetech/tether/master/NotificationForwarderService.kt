@@ -1,6 +1,5 @@
 package it.nuovetech.tether.master
 
-import android.content.Intent
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import it.nuovetech.tether.shared.NotificationLevel
@@ -9,14 +8,14 @@ import it.nuovetech.tether.shared.NotificationLevel
  * Intercetta le notifiche di sistema. Attivo solo quando la Master è abilitata (REQ-PAU-01).
  *
  * Classifica ogni notifica con il livello assegnato al suo package. Le notifiche di livello 1 o 2
- * vengono convertite nel payload EVENT e, per ora, mostrate nella debug area della Main Activity.
- * L'invio alla Slave non è ancora implementato: nulla lascia il dispositivo.
+ * vengono accodate nella [NotificationOutbox] e inviate al relay, che le inoltra alla Slave.
  */
 class NotificationForwarderService : NotificationListenerService() {
 
     private val rules by lazy { LevelRules(this) }
+    private val outbox by lazy { NotificationOutbox.get(this) }
     private val relay by lazy {
-        RelayClient(this).also {
+        RelayClient(outbox).also {
             it.onStateChanged = { state ->
                 relayState = state
                 onRelayStateChanged?.invoke(state)
@@ -41,15 +40,10 @@ class NotificationForwarderService : NotificationListenerService() {
         val appLabel = runCatching {
             packageManager.getApplicationLabel(packageManager.getApplicationInfo(sbn.packageName, 0)).toString()
         }.getOrDefault(sbn.packageName)
-        val payload = EventPayload.build(sbn, appLabel, level)
-
-        remember(payload)
-        relay.send(payload)
-        sendBroadcast(
-            Intent(ACTION_DEBUG_PAYLOAD)
-                .setPackage(packageName)
-                .putExtra(EXTRA_PAYLOAD, payload)
-        )
+        val entry = EventPayload.build(sbn, appLabel, level)
+        // Senza titolo né testo la notifica non contiene nulla da mostrare: la scartiamo.
+        if (entry.title.isBlank() && entry.text.isBlank()) return
+        relay.send(entry)
         // TODO: cifratura (PROTOCOL.md, sezione 4), rinviata su indicazione.
     }
 
@@ -58,10 +52,6 @@ class NotificationForwarderService : NotificationListenerService() {
     }
 
     companion object {
-        const val ACTION_DEBUG_PAYLOAD = "it.nuovetech.tether.master.DEBUG_PAYLOAD"
-        const val EXTRA_PAYLOAD = "payload"
-        private const val BUFFER_SIZE = 50
-
         /** Stato corrente della connessione al relay, letto dalla Main Activity. */
         @Volatile
         var relayState = RelayClient.State.DISCONNECTED
@@ -69,17 +59,5 @@ class NotificationForwarderService : NotificationListenerService() {
         /** Listener impostato dalla Main Activity mentre è visibile. */
         @Volatile
         var onRelayStateChanged: ((RelayClient.State) -> Unit)? = null
-
-        /** Ultimi payload inoltrati, in memoria, letti dalla Main Activity alla riapertura. */
-        private val recent = ArrayDeque<String>()
-
-        @Synchronized
-        private fun remember(payload: String) {
-            recent.addFirst(payload)
-            while (recent.size > BUFFER_SIZE) recent.removeLast()
-        }
-
-        @Synchronized
-        fun recentPayloads(): List<String> = recent.toList()
     }
 }

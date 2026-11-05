@@ -1,10 +1,8 @@
 package it.nuovetech.tether.master
 
-import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
@@ -12,32 +10,33 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
+import android.widget.ListView
 import android.widget.Switch
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
-/** Schermata della Master: toggle di abilitazione, stato dell'accesso alle notifiche e debug (REQ-PAU-01/02). */
+/** Schermata della Master: toggle di abilitazione, stato dell'accesso alle notifiche e elenco in coda (REQ-PAU-01/02). */
 class MainActivity : AppCompatActivity() {
 
     private val prefs by lazy { getSharedPreferences("tether_master", Context.MODE_PRIVATE) }
     private val listenerComponent by lazy { ComponentName(this, NotificationForwarderService::class.java) }
-    private val debugText by lazy { findViewById<TextView>(R.id.debugText) }
-    private var debugEmpty = true
-
-    private val payloadReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val payload = intent?.getStringExtra(NotificationForwarderService.EXTRA_PAYLOAD) ?: return
-            showDebugPayload(payload)
-        }
-    }
+    private val outbox by lazy { NotificationOutbox.get(this) }
+    private val listAdapter by lazy { NotificationListAdapter(this) }
+    private val emptyText by lazy { findViewById<TextView>(R.id.emptyText) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val list = findViewById<ListView>(R.id.notificationList)
+        list.adapter = listAdapter
+        list.setOnItemLongClickListener { _, _, position, _ ->
+            confirmDelete(listAdapter.getItem(position))
+            true
+        }
 
         val root = findViewById<View>(R.id.rootLayout)
         val basePadding = resources.getDimensionPixelSize(R.dimen.screen_padding)
@@ -91,21 +90,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        renderDebugBuffer()
+        refreshList()
         findViewById<TextView>(R.id.relayText).text = getString(R.string.relay_url, BuildConfig.RELAY_URL)
         showRelayState(NotificationForwarderService.relayState)
         NotificationForwarderService.onRelayStateChanged = { state -> runOnUiThread { showRelayState(state) } }
-        ContextCompat.registerReceiver(
-            this,
-            payloadReceiver,
-            IntentFilter(NotificationForwarderService.ACTION_DEBUG_PAYLOAD),
-            ContextCompat.RECEIVER_NOT_EXPORTED,
-        )
+        outbox.onChanged = { runOnUiThread { refreshList() } }
     }
 
     override fun onStop() {
         NotificationForwarderService.onRelayStateChanged = null
-        unregisterReceiver(payloadReceiver)
+        outbox.onChanged = null
         super.onStop()
     }
 
@@ -114,19 +108,20 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.relayText).setText(text)
     }
 
-    /** Ricarica nella debug area i payload ricevuti mentre l'Activity era chiusa. */
-    private fun renderDebugBuffer() {
-        val recent = NotificationForwarderService.recentPayloads()
-        if (recent.isEmpty()) return
-        debugText.text = recent.joinToString("\n\n", postfix = "\n\n")
-        debugEmpty = false
+    /** Aggiorna l'elenco dalla [NotificationOutbox]: più recenti in alto, stato sempre aggiornato. */
+    private fun refreshList() {
+        val entries = outbox.snapshot()
+        listAdapter.submit(entries)
+        emptyText.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
     }
 
-    /** Aggiunge il payload in cima alla debug area; nessun dato viene salvato su disco. */
-    private fun showDebugPayload(payload: String) {
-        val entry = payload + "\n\n"
-        debugText.text = if (debugEmpty) entry else entry + debugText.text
-        debugEmpty = false
+    /** Pressione lunga su una riga: conferma e cancellazione dalla coda. */
+    private fun confirmDelete(entry: OutboxEntry) {
+        AlertDialog.Builder(this)
+            .setMessage(getString(R.string.delete_confirm))
+            .setPositiveButton(R.string.delete) { _, _ -> outbox.remove(entry.id) }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     /**

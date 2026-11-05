@@ -61,6 +61,8 @@ wss.on('connection', (ws) => {
     );
 
     if (others.length === 0) {
+      // Un ACK senza destinatario non va trattenuto: la Master ritrasmette le voci non confermate alla riconnessione.
+      if (msg.type === 'ACK') return;
       // Nessun altro peer: trattieni il messaggio.
       const queued = queues.get(ws.room) ?? [];
       if (queued.length >= MAX_QUEUED) queued.shift();

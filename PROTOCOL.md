@@ -17,7 +17,7 @@ La versione attuale è un passo intermedio per verificare il flusso Master → R
 - **Messaggi:** JSON in chiaro, senza busta `v/pid/kind/id/seq/ts/nonce/ct/sig`. Il payload `EVENT` della sezione 5.1 è inviato direttamente.
 - **Handshake:** il client invia per primo `{"type":"JOIN","conversationKey":"<chiave>"}`. Il Relay registra il client nella stanza e inoltra ogni messaggio successivo agli altri peer della stessa stanza.
 - **Stato connessione:** la Master mostra URL del Relay e stato (connesso / non connesso). La Slave mostra "Connected to relay" e poi gli eventi.
-- **Coda nel Relay:** se nella stanza non c'è nessun altro peer, il Relay trattiene i messaggi (max 500 per stanza, salvati in `relay/queue.json`) e li inoltra in ordine al primo peer che entra. La Master non ritrasmette: considera il messaggio consegnato quando il Relay lo riceve.
+- **Coda nel Relay:** se nella stanza non c'è nessun altro peer, il Relay trattiene i messaggi (max 500 per stanza, salvati in `relay/queue.json`) e li inoltra in ordine al primo peer che entra. Gli ACK della Slave non vengono trattenuti: se non c'è nessun altro peer vengono scartati. La Master non ritrasmette: considera il messaggio consegnato quando il Relay lo riceve.
 - **Coda nella Master:** se il Relay non è raggiungibile, i payload restano in `SharedPreferences` (max 500) e vengono inviati alla riconnessione.
 
 Le sezioni seguenti restano il riferimento per la versione definitiva.
@@ -140,7 +140,10 @@ Payload cifrato, o campo `ct` vuoto per l'heartbeat, come descritto sotto.
 
 ## 6. Consegna e affidabilità
 
-- **ACK (REQ-FWD-03):** la Slave invia un `ACK` per ogni `DATA` ricevuto, anche se duplicato. Il Relay conserva il messaggio finché non riceve l'ACK o scade.
+- **ACK (REQ-FWD-03):** la Slave invia `{"type":"ACK","ackId":"<eventId>"}` per ogni `EVENT` ricevuto, anche se duplicato. La Master segna la voce come ACKED alla ricezione. Il Relay inoltra l'ACK alla Master e non lo accoda.
+- **Deduplicazione:** la Slave mantiene un insieme persistente degli `eventId` già ricevuti (max 2000). Un evento già visto viene confermato con ACK ma non visualizzato di nuovo.
+- **Cancellazione manuale (solo locale):** l'utente può rimuovere una voce dalla lista: nella Master con pressione lunga e conferma; nella Slave con swipe orizzontale in una qualsiasi direzione, senza conferma. Nella Master la voce esce dalla coda locale e non viene più trasmessa; se era già nel Relay non viene ritirata. Nella Slave la voce esce dalla lista ma il suo `eventId` resta nell'insieme di deduplicazione, così una ritrasmissione non ricompare. Non è previsto alcun messaggio di protocollo per la cancellazione.
+- **Ritrasmissione:** alla riconnessione la Master reinvia tutte le voci non ACKED.
 - **Ritentativi:** backoff esponenziale tra 5 secondi e 5 minuti. Il Relay conserva i messaggi non confermati per 72 ore di default (REQ-FWD-02).
 - **Ordinamento:** la Slave ordina per `postedAt`, non per ordine di arrivo. Gli eventi sono mostrati con l'orario originale.
 - **Deduplicazione (REQ-FWD-04):** la Slave ignora un `id` già visto. Mantiene un registro degli ultimi 2000 `id` o delle ultime 72 ore, quale delle due è più ampia.
