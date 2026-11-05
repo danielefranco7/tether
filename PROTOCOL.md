@@ -2,11 +2,24 @@
 
 **Versione protocollo:** 1
 **Riferimenti:** REQ-INT-03, REQ-INT-04, REQ-SEC-01…05, REQ-FWD-02…04, REQ-STA-01/03/07
-**Stato:** Bozza
+**Stato:** Bozza. Implementazione di sviluppo parziale (vedi sezione 0).
 
 Questo documento definisce il formato dei messaggi scambiati tra App Master, Relay e App Slave. È indipendente da Android: un client Linux dedicato deve poter implementare lo stesso protocollo.
 
 ---
+
+## 0. Stato dell'implementazione di sviluppo
+
+La versione attuale è un passo intermedio per verificare il flusso Master → Relay → Slave. **Non è ancora conforme alle sezioni 2–4 e 6–7** (cifratura, firma, pairing, ACK e deduplicazione non sono implementati).
+
+- **Trasporto:** WebSocket `ws://` (in chiaro), con URL del Relay in `gradle.properties` (`relayUrl`) e generato in `BuildConfig`.
+- **Abbinamento:** non presente. Tutti i dispositivi con la stessa `conversationKey` (predefinita `dev-room`) sono nella stessa stanza.
+- **Messaggi:** JSON in chiaro, senza busta `v/pid/kind/id/seq/ts/nonce/ct/sig`. Il payload `EVENT` della sezione 5.1 è inviato direttamente.
+- **Handshake:** il client invia per primo `{"type":"JOIN","conversationKey":"<chiave>"}`. Il Relay registra il client nella stanza e inoltra ogni messaggio successivo agli altri peer della stessa stanza.
+- **Stato connessione:** la Master mostra URL del Relay e stato (connesso / non connesso). La Slave mostra "Connected to relay" e poi gli eventi.
+- **Nessuna coda:** se il Relay non è raggiungibile, l'evento viene scartato.
+
+Le sezioni seguenti restano il riferimento per la versione definitiva.
 
 ## 1. Principi
 
